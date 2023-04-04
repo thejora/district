@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+  <h1>Поиск улиц</h1>
+
+   <form id="search-form">
+    <label for="search-input">Введите название улицы:</label>
+    <input type="text" id="search-input" name="search_query">
+    <button type="submit">Поиск</button>
+  </form>
+  <ul id="search-results">
+  </ul>
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+    $(document).ready(function(){
+        $('#search-form').on('submit', function(event){
+            event.preventDefault();
+            var search_query = $('#search-input').val();
+            $.ajax({
+                url: "{% url 'search_streets' %}",
+                method: 'GET',
+                data: {
+                    'search_query': search_query,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success: function(response){
+                    var streets = response['streets'];
+                    var list = $('#search-results');
+                    list.empty();
+                    for(var i=0; i<streets.length; i++){
+                        var street = streets[i];
+                        var item = $('<li></li>');
+                        var link = $('<a></a>');
+                        link.attr('href', '/street/' + street['id']);
+                        link.text(street['name']);
+                        item.append(link);
+                        list.append(item);
+                    }
+                }
+            });
+        });
+    });
+</script>
+
+{% endblock %}
+
+
+
